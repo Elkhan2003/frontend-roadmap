@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Руководство: Подключение Prisma к Express с Supabase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #764ba2;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.4em;
+        }
+
+        .step {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .inline-code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #d63384;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .info {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .file-structure {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 15px 0;
+        }
+
+        footer {
+            background: #2d2d2d;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Подключение Prisma к Express</h1>
+            <p>Интеграция с Supabase PostgreSQL</p>
+        </header>
+
+        <div class="content">
+            <section id="intro">
+                <h2>📚 Введение</h2>
+                <p>В этом руководстве вы узнаете, как подключить <strong>Prisma ORM</strong> к вашему Express приложению с использованием <strong>Supabase</strong> в качестве базы данных PostgreSQL.</p>
+
+                <div class="info">
+                    <strong>Что такое:</strong>
+                    <ul>
+                        <li><strong>Prisma</strong> - современный ORM для работы с базами данных</li>
+                        <li><strong>Express</strong> - популярный фреймворк для Node.js</li>
+                        <li><strong>Supabase</strong> - облачная платформа с PostgreSQL базой данных</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="prerequisites">
+                <h2>✅ Требования</h2>
+                <ul>
+                    <li>Node.js версии 16 или выше</li>
+                    <li>npm или yarn установлен</li>
+                    <li>Аккаунт на <a href="https://supabase.com" target="_blank">Supabase</a></li>
+                    <li>Базовые знания TypeScript и Express</li>
+                </ul>
+            </section>
+
+            <section id="step1">
+                <h2>Шаг 1: Установка зависимостей</h2>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <strong>Установите основные зависимости:</strong>
+                </div>
+
+                <pre><code>npm install @prisma/client @prisma/adapter-pg pg dotenv express</code></pre>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <strong>Установите dev зависимости:</strong>
+                </div>
+
+                <pre><code>npm install -D prisma typescript @types/express @types/pg ts-node nodemon</code></pre>
+
+                <div class="info">
+                    <strong>Пояснение пакетов:</strong>
+                    <ul>
+                        <li><span class="inline-code">@prisma/client</span> - Prisma клиент для работы с БД</li>
+                        <li><span class="inline-code">@prisma/adapter-pg</span> - Адаптер для PostgreSQL</li>
+                        <li><span class="inline-code">pg</span> - PostgreSQL драйвер</li>
+                        <li><span class="inline-code">dotenv</span> - Для работы с переменными окружения</li>
+                        <li><span class="inline-code">prisma</span> - CLI инструмент Prisma</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="step2">
+                <h2>Шаг 2: Получение DATABASE_URL из Supabase</h2>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <strong>Создайте проект в Supabase:</strong>
+                    <ol>
+                        <li>Перейдите на <a href="https://supabase.com" target="_blank">supabase.com</a></li>
+                        <li>Нажмите "New Project"</li>
+                        <li>Заполните название, пароль базы данных и регион</li>
+                        <li>Дождитесь создания проекта (2-3 минуты)</li>
+                    </ol>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <strong>Получите строку подключения:</strong>
+                    <ol>
+                        <li>В боковом меню выберите <strong>Settings</strong></li>
+                        <li>Перейдите в раздел <strong>Database</strong></li>
+                        <li>Найдите секцию <strong>Connection string</strong></li>
+                        <li>Выберите <strong>URI</strong> и скопируйте строку</li>
+                        <li>Замените <span class="inline-code">[YOUR-PASSWORD]</span> на ваш реальный пароль</li>
+                    </ol>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ Важно:</strong> Не публикуйте DATABASE_URL в публичных репозиториях! Всегда используйте .env файл и добавьте его в .gitignore.
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <strong>Создайте файл <span class="inline-code">.env</span> в корне проекта:</strong>
+                </div>
+
+                <pre><code>DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres"</code></pre>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <strong>Добавьте <span class="inline-code">.env</span> в <span class="inline-code">.gitignore</span>:</strong>
+                </div>
+
+                <pre><code># Environment variables
+.env
+.env.local
+.env.*.local</code></pre>
+            </section>
+
+            <section id="step3">
+                <h2>Шаг 3: Настройка Prisma</h2>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <strong>Создайте файл <span class="inline-code">prisma.config.ts</span> в корне проекта:</strong>
+                </div>
+
+                <pre><code>import "dotenv/config";
+import { defineConfig, env } from "prisma/config";
+
+export default defineConfig({
+    schema: "prisma/schema.prisma",
+    migrations: {
+        path: "prisma/migrations",
+    },
+    datasource: {
+        url: env("DATABASE_URL"),
+    },
+});</code></pre>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <strong>Создайте папку <span class="inline-code">prisma</span> и файл <span class="inline-code">prisma/schema.prisma</span>:</strong>
+                </div>
+
+                <pre><code>generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+}</code></pre>
+
+                <div class="info">
+                    <strong>📝 Пояснение:</strong>
+                    <ul>
+                        <li><span class="inline-code">output</span> - указывает где будет сгенерирован Prisma клиент</li>
+                        <li><span class="inline-code">@id</span> - первичный ключ</li>
+                        <li><span class="inline-code">@unique</span> - уникальное значение</li>
+                        <li><span class="inline-code">@default</span> - значение по умолчанию</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="step4">
+                <h2>Шаг 4: Создание миграций</h2>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <strong>Создайте первую миграцию:</strong>
+                </div>
+
+                <pre><code>npx prisma migrate dev --name init</code></pre>
+
+                <p>Эта команда:</p>
+                <ul>
+                    <li>Создаст таблицы в вашей Supabase базе данных</li>
+                    <li>Сгенерирует Prisma клиент в <span class="inline-code">src/generated/prisma</span></li>
+                    <li>Сохранит миграцию в папке <span class="inline-code">prisma/migrations</span></li>
+                </ul>
+
+                <div class="success">
+                    <strong>✅ Отлично!</strong> Ваша база данных создана и Prisma клиент готов к использованию!
+                </div>
+            </section>
+
+            <section id="step5">
+                <h2>Шаг 5: Инициализация Prisma клиента</h2>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <strong>Создайте файл <span class="inline-code">src/plugins/prisma.ts</span>:</strong>
+                </div>
+
+                <pre><code>import { PrismaClient } from "../generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
+
+// Создаем пул соединений с PostgreSQL
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL
+});
+
+// Создаем адаптер для Prisma
+const adapter = new PrismaPg(pool);
+
+// Экспортируем Prisma клиент с адаптером
+export const prisma = new PrismaClient({
+    adapter,
+});</code></pre>
+
+                <div class="info">
+                    <strong>💡 Почему используется PG адаптер?</strong>
+                    <p>Адаптер <span class="inline-code">@prisma/adapter-pg</span> обеспечивает лучшую производительность и совместимость с PostgreSQL, особенно при работе с edge функциями и serverless окружениями.</p>
+                </div>
+            </section>
+
+            <section id="step6">
+                <h2>Шаг 6: Использование Prisma в приложении</h2>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <strong>Импортируйте Prisma клиент в вашем контроллере:</strong>
+                </div>
+
+                <pre><code>import { Request, Response } from "express";
+import { prisma } from "../../plugins/prisma";
+
+const getUsers = async (req: Request, res: Response) => {
+    try {
+        const users = await prisma.user.findMany();
+
+        res.status(200).json({
+            success: true,
+            data: users,
+        });
+    } catch (error) {
+        console.error("Error in getUsers:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        });
+    }
+};
+
+export default { getUsers };</code></pre>
+
+                <div class="success">
+                    <strong>✅ Готово!</strong> Теперь вы можете использовать Prisma во всех ваших контроллерах!
+                </div>
+            </section>
+
+            <section id="tips">
+                <h2>💡 Полезные команды</h2>
+
+                <h3>Prisma Studio</h3>
+                <p>Визуальный просмотр и редактирование данных:</p>
+                <pre><code>npx prisma studio</code></pre>
+
+                <h3>Обновление схемы</h3>
+                <p>После изменения <span class="inline-code">schema.prisma</span>:</p>
+                <pre><code>npx prisma migrate dev --name описание_изменений
+npx prisma generate</code></pre>
+
+                <h3>Форматирование схемы</h3>
+                <p>Автоматическое форматирование schema.prisma:</p>
+                <pre><code>npx prisma format</code></pre>
+
+                <h3>Валидация схемы</h3>
+                <p>Проверка схемы на ошибки:</p>
+                <pre><code>npx prisma validate</code></pre>
+            </section>
+
+            <section id="structure">
+                <h2>📁 Итоговая структура проекта</h2>
+
+                <div class="file-structure">
+project-root/
+├── prisma/
+│   ├── migrations/
+│   │   └── [timestamp]_init/
+│   │       └── migration.sql
+│   └── schema.prisma
+├── src/
+│   ├── generated/
+│   │   └── prisma/
+│   │       ├── client.ts
+│   │       └── ...
+│   ├── plugins/
+│   │   └── prisma.ts
+│   └── ...
+├── .env
+├── .gitignore
+├── package.json
+├── prisma.config.ts
+└── tsconfig.json
+                </div>
+            </section>
+
+            <section id="common-issues">
+                <h2>🔧 Решение частых проблем</h2>
+
+                <h3>Проблема: "Cannot find module '@prisma/client'"</h3>
+                <div class="warning">
+                    <strong>Решение:</strong>
+                    <pre><code>npx prisma generate</code></pre>
+                </div>
+
+                <h3>Проблема: "Environment variable not found: DATABASE_URL"</h3>
+                <div class="warning">
+                    <strong>Решение:</strong>
+                    <ul>
+                        <li>Убедитесь что файл <span class="inline-code">.env</span> существует</li>
+                        <li>Проверьте что <span class="inline-code">dotenv/config</span> импортирован</li>
+                        <li>Перезапустите сервер разработки</li>
+                    </ul>
+                </div>
+
+                <h3>Проблема: Ошибка подключения к базе данных</h3>
+                <div class="warning">
+                    <strong>Решение:</strong>
+                    <ul>
+                        <li>Проверьте правильность DATABASE_URL</li>
+                        <li>Убедитесь что заменили [YOUR-PASSWORD] на реальный пароль</li>
+                        <li>Проверьте что проект Supabase запущен</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="resources">
+                <h2>📚 Дополнительные ресурсы</h2>
+
+                <ul>
+                    <li><a href="https://www.prisma.io/docs" target="_blank">Документация Prisma</a></li>
+                    <li><a href="https://supabase.com/docs" target="_blank">Документация Supabase</a></li>
+                    <li><a href="https://expressjs.com/" target="_blank">Документация Express</a></li>
+                </ul>
+            </section>
+
+            <section id="conclusion">
+                <h2>🎓 Заключение</h2>
+
+                <div class="success">
+                    <p><strong>Поздравляем!</strong> Вы успешно подключили Prisma к Express с Supabase. Теперь у вас есть:</p>
+                    <ul>
+                        <li>✅ Подключенная PostgreSQL база данных через Supabase</li>
+                        <li>✅ Настроенный Prisma ORM</li>
+                        <li>✅ Готовый к использованию Prisma клиент</li>
+                        <li>✅ Миграции базы данных</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <p>Создано для студентов | 2026</p>
+            <p>Prisma + Express + Supabase</p>
+        </footer>
+    </div>
+</body>
+</html>
